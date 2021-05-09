@@ -1,0 +1,4 @@
+ifup/eth0
+mount/dev
+mount/run
+sysctl

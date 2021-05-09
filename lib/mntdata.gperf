@@ -1,0 +1,76 @@
+%readonly-tables
+%compare-strncmp
+%define lookup-function-name mntspec
+%{
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "mntdata.h"
+
+#define _NUL 0
+#define _OPT 1
+#define _REQ 2
+#define _DIE 3
+
+static const struct mntspec *mntspec(register const char *str, register size_t len);
+%}
+struct mntspec {
+	char *name;
+	unsigned args;
+};
+%%
+auto, _NUL,
+noauto, _NUL
+user, _OPT
+nouser, _NUL
+users, _NUL
+nousers, _NUL
+owner, _NUL
+noowner, _NUL
+group, _NUL
+nogroup, _NUL
+_netdev, _NUL
+comment, _REQ
+loop, _OPT | _DIE
+offset, _REQ | _DIE
+sizelimit, _REQ | _DIE
+encryption, _REQ | _DIE
+nofail, _NUL
+uhelper, _REQ
+helper, _REQ | _DIE
+ignore, _NUL | _DIE
+%%
+int mntdata(const char *tok, size_t len)
+{
+	const struct mntspec *spec;
+
+	const char *arg = strchrnul(tok, '=');
+	if(*arg && (arg[1] == 0 || arg == tok))
+		goto fail;
+
+	if((spec = mntspec(tok, arg - tok)))
+		switch(spec->args) {
+		case _NUL:
+			if(*arg)
+				goto fail;
+			/* fall through */
+		case _OPT:
+			return 0;
+
+		case _REQ:
+			if(*arg)
+				return 0;
+
+		fail:	errno = EINVAL;
+			return -1;
+
+		default:
+			errno = ENOTSUP;
+			return -1;
+		}
+	else if(tok[0] == 'x' && tok[1] == '-')
+		return 0;
+
+	return len;
+}

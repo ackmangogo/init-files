@@ -1,0 +1,82 @@
+/*
+ * #!/bin/sh
+ * ip link set wg0 down
+ * ip link del wg0
+ */
+
+#include <libmnl/libmnl.h>
+#if defined(TID) && defined(FWM)
+#include <linux/fib_rules.h>
+#endif
+#include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define wgX "wg0"
+
+int main(void)
+{
+	struct mnl_socket *nl;
+	char buf[MNL_SOCKET_BUFFER_SIZE];
+	struct nlmsghdr *nlh;
+#if defined(TID) && defined(FWM)
+	struct fib_rule_hdr *frh;
+#endif
+	struct ifinfomsg *ifi;
+
+	nl = mnl_socket_open(NETLINK_ROUTE);
+	if(nl == NULL)
+		goto err;
+
+	if(mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID) < 0)
+		goto err1;
+
+#if defined(TID) && defined(FWM)
+	/* ip rule del table main suppress_prefixlength 0 */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_DELRULE;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+	frh = mnl_nlmsg_put_extra_header(nlh, sizeof(*frh));
+	frh->family = AF_INET;
+	frh->table = 254; /* reserved for main */
+
+	frh->action = FR_ACT_TO_TBL;
+	mnl_attr_put_u32(nlh, FRA_SUPPRESS_PREFIXLEN, 0);
+	mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+
+	/* ip rule del fwmark FWM table TID */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_DELRULE;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+	frh = mnl_nlmsg_put_extra_header(nlh, sizeof(*frh));
+	frh->family = AF_INET;
+#if TID > 255
+	frh->table = RT_TABLE_UNSPEC;
+	mnl_attr_put_u32(nlh, FRA_TABLE, TID);
+#else
+	frh->table = TID;
+#endif
+	frh->action = FR_ACT_TO_TBL;
+	frh->flags = FIB_RULE_INVERT;
+	mnl_attr_put_u32(nlh, FRA_FWMARK, FWM);
+	mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+#endif
+	/* bring down and remove interface */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_DELLINK;
+	nlh->nlmsg_flags = NLM_F_REQUEST;
+	ifi = mnl_nlmsg_put_extra_header(nlh, sizeof(*ifi));
+	ifi->ifi_family = AF_UNSPEC;
+	ifi->ifi_change = IFF_UP;
+
+	mnl_attr_put(nlh, IFLA_IFNAME, sizeof(wgX), wgX);
+	if(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) < 0)
+		goto err1;
+
+	mnl_socket_close(nl);
+	return EXIT_SUCCESS;
+
+err1:	mnl_socket_close(nl);
+err:	return EXIT_FAILURE;
+}

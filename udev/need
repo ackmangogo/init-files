@@ -1,0 +1,4 @@
+mount/dev
+mount/proc
+mount/run
+mount/sys

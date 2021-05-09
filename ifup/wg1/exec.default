@@ -1,0 +1,146 @@
+/*
+ * #!/bin/sh
+ * ip link add wgX type wireguard
+ * ip addr add a.b.c.d/n dev wgX
+
+ * wg setconf wgX /etc/wireguard/wgX.conf
+ * ip link set wgX up
+ */
+
+#define ADDRESS IPv4(10, 10, 0, 4)
+
+#include <libmnl/libmnl.h>
+#if defined(TID) && defined(FWM)
+#include <linux/fib_rules.h>
+#endif
+#include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define IPv4(a, b, c, d) ((a<<0)|(b<<8)|(c<<16)|(d<<24))
+/* interface name */
+#define wgX "wg2"
+
+int main(void)
+{
+	static char * const wg[] = {"/usr/bin/wg", "setconf", wgX, "/etc/wireguard/"wgX".conf", NULL};
+
+	struct mnl_socket *nl;
+	char buf[MNL_SOCKET_BUFFER_SIZE];
+	struct nlmsghdr *nlh;
+	struct ifinfomsg *ifi;
+	struct nlattr *linkinfo;
+	struct ifaddrmsg *ifa;
+#if defined(TID) && defined(FWM)
+	struct rtmsg *rtm;
+#endif
+	int iface, len;
+
+	nl = mnl_socket_open(NETLINK_ROUTE);
+	if(nl == NULL)
+		goto err;
+
+	if(mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID) < 0)
+		goto err1;
+
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_NEWLINK;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL|NLM_F_ACK;
+	ifi = mnl_nlmsg_put_extra_header(nlh, sizeof(*ifi));
+	ifi->ifi_family = AF_UNSPEC;
+	ifi->ifi_flags = ifi->ifi_change = IFF_UP;
+
+	linkinfo = mnl_attr_nest_start(nlh, IFLA_LINKINFO);
+	mnl_attr_put(nlh, IFLA_INFO_KIND, 9, "wireguard");
+	mnl_attr_nest_end(nlh, linkinfo);
+	mnl_attr_put(nlh, IFLA_IFNAME, sizeof(wgX), wgX);
+
+	/* create wireguard interface and bring it up */
+	if(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) <= 0)
+		goto err1;
+
+	len = mnl_socket_recvfrom(nl, &buf, sizeof(buf));
+	if(len <= 0)
+		goto err1;
+
+	if(mnl_cb_run(buf, len, 0, 0, NULL, NULL) < 0)
+		goto err1; /* already registered */
+
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_NEWADDR;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+	ifa = mnl_nlmsg_put_extra_header(nlh, sizeof(*ifa));
+	ifa->ifa_family = AF_INET;
+	ifa->ifa_prefixlen = 24; /* 255.255.255.0 / 24 */
+	iface = if_nametoindex(wgX);
+	ifa->ifa_index = iface;
+
+	mnl_attr_put_u32(nlh, IFA_LOCAL, ADDRESS);
+
+	/* set IPv4 address */
+	if(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) <= 0)
+		goto err1;
+
+#if defined(TID) && defined(FWM)
+	/* ip route add default dev wgX table TID */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_NEWROUTE;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL|NLM_F_ACK;
+	rtm = mnl_nlmsg_put_extra_header(nlh, sizeof(*rtm));
+	rtm->rtm_family = AF_INET;
+	rtm->rtm_protocol = RTPROT_BOOT;
+#if TID > 255
+	rtm->rtm_table = RT_TABLE_UNSPEC;
+	mnl_attr_put_u32(nlh, RTA_TABLE, TID);
+#else
+	rtm->rtm_table = TID;
+#endif
+	rtm->rtm_type = RTN_UNICAST;
+	rtm->rtm_scope = RT_SCOPE_LINK;
+	mnl_attr_put_u32(nlh, RTA_OIF, iface);
+
+	/* failures are not fatal, reduced functionality */
+	if(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) > 0
+	&&(len = mnl_socket_recvfrom(nl, buf, sizeof(buf))) > 0
+	&& mnl_cb_run(buf, len, 0, 0, NULL, NULL) >= 0) {
+		struct fib_rule_hdr *frh;
+
+		/* ip rule add not fwmark FWM table TID */
+		nlh = mnl_nlmsg_put_header(buf);
+		nlh->nlmsg_type = RTM_NEWRULE;
+		nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+		frh = mnl_nlmsg_put_extra_header(nlh, sizeof(*frh));
+		frh->family = AF_INET;
+	#if TID > 255
+		frh->table = RT_TABLE_UNSPEC;
+		mnl_attr_put_u32(nlh, FRA_TABLE, TID);
+	#else
+		frh->table = TID;
+	#endif
+		frh->action = FR_ACT_TO_TBL;
+		frh->flags = FIB_RULE_INVERT;
+		mnl_attr_put_u32(nlh, FRA_FWMARK, FWM);
+		mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+
+		/* ip rule add table main suppress_prefixlength 0 */
+		nlh = mnl_nlmsg_put_header(buf);
+		nlh->nlmsg_type = RTM_NEWRULE;
+		nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+		frh = mnl_nlmsg_put_extra_header(nlh, sizeof(*frh));
+		frh->family = AF_INET;
+		frh->table = 254; /* reserved for main */
+
+		frh->action = FR_ACT_TO_TBL;
+		mnl_attr_put_u32(nlh, FRA_SUPPRESS_PREFIXLEN, 0);
+		mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+	}
+#endif
+	mnl_socket_close(nl);
+
+	execve(wg[0], wg, NULL);
+	return EXIT_FAILURE;
+
+err1:	mnl_socket_close(nl);
+err:	return EXIT_FAILURE;
+}

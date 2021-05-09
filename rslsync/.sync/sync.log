@@ -1,0 +1,106 @@
+﻿platform: Linux 4.9.130-gentoo #1 SMP Tue Oct 2 15:48:34 CST 2018 x86_64
+version: 2.5.12.1191
+[13:39:43.684] VerifyFileWithHash failed on file /usr/src/init-files-1.0.1/rslsync/.sync/settings.dat with status 2.
+[13:39:43.684] VerifyFileWithHash failed on file /usr/src/init-files-1.0.1/rslsync/.sync/settings.dat with status 2.
+[13:39:43.684] VerifyFileWithHash failed on file /usr/src/init-files-1.0.1/rslsync/.sync/settings.dat with status 2.
+[20181009 13:39:43.685] ZIP: Can't locate [version] in zip, error -100.
+[13:44:21.116] Debug log mask has been set to FFFFFFFF
+[13:44:21.116] Features mask has been set to 0
+[13:44:21.116] VerifyFileWithHash failed on file /usr/src/init-files-1.0.1/rslsync/.sync/settings.dat with status 2.
+[13:44:21.116] VerifyFileWithHash failed on file /usr/src/init-files-1.0.1/rslsync/.sync/settings.dat with status 2.
+[13:44:21.116] VerifyFileWithHash failed on file /usr/src/init-files-1.0.1/rslsync/.sync/settings.dat with status 2.
+[20181009 13:44:21.116] ZIP: Can't locate [version] in zip, error -100.
+[20181009 13:44:21.118] Directory root is ""
+[20181009 13:44:21.118] test sha1: AE5BD8EFEA5322C4D9986D06680A781392F9A642
+[20181009 13:44:21.118] test sha2: 630DCD2966C4336691125448BBB25B4FF412A49C732DB2C8ABC1B8581BD710DD
+[20181009 13:44:21.118] test aes: 0A940BB5416EF045F1C39458C653EA5A07FEEF74E1D5036E900EEE118E949293
+[20181009 13:44:21.118] diskio_controller created
+[20181009 13:44:21.118] VerifyFileWithHash failed on file ./.sync//settings.dat with status 2.
+[20181009 13:44:21.118] VerifyFileWithHash failed on file ./.sync//settings.dat with status 2.
+[20181009 13:44:21.118] VerifyFileWithHash failed on file ./.sync//settings.dat with status 2.
+[20181009 13:44:21.124] register diskio completion queue with id 1
+[20181009 13:44:21.124] PLC[0x0000561438df9b20] binding on 0.0.0.0:36148
+[20181009 13:44:21.124] D! 20PeerListenConnection::listen[0x0000561438df9b20][8] bound listening socket 8 to IP 0.0.0.0:36148
+[20181009 13:44:21.124] PLC[0x0000561438df9b60] binding on [::]:36148
+[20181009 13:44:21.126] UDP: bound listening socket 9 to IP 0.0.0.0:36148
+[20181009 13:44:21.128] D! 20HttpListenConnection::listen[0x0000561438dff7c0][11] bound listening socket 11 to IP 127.0.0.1:8888
+[20181009 13:44:21.131] register diskio completion queue with id 2
+[20181009 13:44:21.132] Create diskio thread for drive with id 4779396275, path: 
+[20181009 13:44:21.132] Create diskio thread for drive with id 4610928887, path: 
+[20181009 13:44:21.132] Create diskio thread for drive with id 5328636922, path: 
+[20181009 13:44:21.132] diskio thread start, drive_id = 4779396275, priority = normal
+[20181009 13:44:21.132] Create diskio thread for drive with id 4474014696, path: 
+[20181009 13:44:21.132] diskio thread start, drive_id = 4610928887, priority = normal
+[20181009 13:44:21.132] diskio thread start, drive_id = 5328636922, priority = normal
+[20181009 13:44:21.132] Create diskio thread for drive with id 5120957243, path: 
+[20181009 13:44:21.132] Create diskio thread for drive with id 4819760308, path: 
+[20181009 13:44:21.132] diskio thread start, drive_id = 4474014696, priority = normal
+[20181009 13:44:21.132] diskio thread start, drive_id = 5120957243, priority = normal
+[20181009 13:44:21.132] Create diskio thread for drive with id 5268934419, path: 
+[20181009 13:44:21.132] diskio thread start, drive_id = 4819760308, priority = normal
+[20181009 13:44:21.132] Create diskio thread for drive with id 4940478919, path: 
+[20181009 13:44:21.132] diskio thread start, drive_id = 5268934419, priority = normal
+[20181009 13:44:21.132] diskio thread start, drive_id = 4940478919, priority = normal
+[20181009 13:44:21.133] IPv6 is installed
+[20181009 13:44:21.133] VerifyFileWithHash failed on file ./.sync//sync.dat with status 2.
+[20181009 13:44:21.133] VerifyFileWithHash failed on file ./.sync//sync.dat with status 2.
+[20181009 13:44:21.133] VerifyFileWithHash failed on file ./.sync//sync.dat with status 2.
+[20181009 13:44:21.133] Unsupported or empty sync.dat file
+[20181009 13:44:21.133] My PeerID: 1063CD52CBB7FF52CD909482C6334556273D79BB
+[20181009 13:44:21.133] LC: LoadLicenses: there is no pro license
+[20181009 13:44:21.133] VerifyFileWithHash failed on file ./.sync//history.dat with status 2.
+[20181009 13:44:21.133] VerifyFileWithHash failed on file ./.sync//history.dat with status 2.
+[20181009 13:44:21.133] VerifyFileWithHash failed on file ./.sync//history.dat with status 2.
+[20181009 13:44:21.133] Joining to the multicast group 239.192.0.0:3838 on interface 192.168.88.11 (eth0)
+[20181009 13:44:21.133] Joining to the multicast group 239.192.0.0:3838 on interface 127.0.0.1 (lo)
+[20181009 13:44:21.133] Create diskio thread for drive with id 18446744073709551614, path: 
+[20181009 13:44:21.133] diskio thread start, drive_id = 18446744073709551614, priority = normal
+[20181009 13:44:21.135] Scheduler: Apply global rule, download limit: -1, upload limit: -1
+[20181009 13:44:21.135] CoreState: Total memory: 16744136704, used by Sync: 8323072, percentage used: 0.05
+[20181009 13:44:21.135] message thread start
+[20181009 13:44:21.453] D! 15UpnpFetchSocket::set_error[0x00007f5430001600][26] 104 (Connection reset by peer)
+[20181009 13:44:21.462] D! 15UpnpFetchSocket::set_error[0x00007f5430001600][26] 104 (Connection reset by peer)
+[20181009 13:44:21.467] D! 15UpnpFetchSocket::set_error[0x00007f5430001600][26] 104 (Connection reset by peer)
+[20181009 13:44:21.479] D! 15UpnpFetchSocket::set_error[0x00007f5430001600][26] 104 (Connection reset by peer)
+[20181009 13:44:21.482] D! 15UpnpFetchSocket::set_error[0x00007f5430001600][26] 104 (Connection reset by peer)
+[20181009 13:44:21.487] D! 15UpnpFetchSocket::set_error[0x00007f5430001600][26] 104 (Connection reset by peer)
+[20181009 13:44:30.638] Debug log mask has been set to FFFFFFFF
+[20181009 13:44:30.638] Features mask has been set to 0
+[20181009 13:44:52.306] OpenSSL: Loaded X509 trusted CA from "/etc/ssl/certs/ca-certificates.crt"
+[20181009 13:47:03.428] Received shutdown request via signal 15
+[20181009 13:47:03.432] saved history: 0 events
+[20181009 13:47:04.298] SyncFolderScanner: shut down
+[20181009 13:47:04.298] unregister diskio completion queue with id 2
+[20181009 13:47:04.298] message thread stop
+[20181009 13:47:04.299] GS: shutdown
+[20181009 13:47:05.115] unregister diskio completion queue with id 1
+[20181009 13:47:05.115] Torrent session shutdown: done waiting
+[20181009 13:47:05.115] Stopping network threads
+[20181009 13:47:06.079] Stopping UDP threads for 0.0.0.0:36148
+[20181009 13:47:06.128] Stopping UDP threads for [::]:36148
+[20181009 13:47:06.228] Shutdown. Saving config sync.dat
+[20181009 13:47:06.228] diskio thread stop, drive_id = 5328636922
+[20181009 13:47:06.228] diskio destroy, drive_id = 5328636922
+[20181009 13:47:06.228] diskio thread stop, drive_id = 5268934419
+[20181009 13:47:06.228] diskio destroy, drive_id = 5268934419
+[20181009 13:47:06.228] diskio thread stop, drive_id = 5120957243
+[20181009 13:47:06.229] diskio destroy, drive_id = 5120957243
+[20181009 13:47:06.229] diskio thread stop, drive_id = 4940478919
+[20181009 13:47:06.229] diskio destroy, drive_id = 4940478919
+[20181009 13:47:06.229] diskio thread stop, drive_id = 4819760308
+[20181009 13:47:06.229] diskio destroy, drive_id = 4819760308
+[20181009 13:47:06.229] diskio thread stop, drive_id = 4779396275
+[20181009 13:47:06.229] diskio destroy, drive_id = 4779396275
+[20181009 13:47:06.229] diskio thread stop, drive_id = 4610928887
+[20181009 13:47:06.229] diskio destroy, drive_id = 4610928887
+[20181009 13:47:06.229] diskio thread stop, drive_id = 4474014696
+[20181009 13:47:06.229] diskio destroy, drive_id = 4474014696
+[20181009 13:47:06.229] diskio thread stop, drive_id = 18446744073709551614
+[20181009 13:47:06.229] diskio destroy, drive_id = 18446744073709551614
+[20181009 13:47:06.229] diskio_controller destroyed
+[13:47:08.528] Debug log mask has been set to FFFFFFFF
+[13:47:08.528] Features mask has been set to 0
+[20181009 13:47:08.529] ZIP: Can't locate [version] in zip, error -100.
+[14:47:11.484] Debug log mask has been set to FFFFFFFF
+[14:47:11.485] Features mask has been set to 0
+[20181010 14:47:11.486] ZIP: Can't locate [version] in zip, error -100.

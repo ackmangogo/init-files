@@ -1,0 +1,4 @@
+ifup/eth0
+iptables
+mount/dev
+mount/run

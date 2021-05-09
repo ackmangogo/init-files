@@ -1,0 +1,93 @@
+/*
+ * #!/bin/sh
+ * ip link set wg4 down
+ * ip link del wg4
+ */
+
+#define ADDRESS IPv4(10, 7, 0, 2)
+
+#include <libmnl/libmnl.h>
+#ifdef TID
+#include <linux/fib_rules.h>
+#endif
+#include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define IPv4(a, b, c, d) ((a<<0)|(b<<8)|(c<<16)|(d<<24))
+#define wgX "wg4"
+
+int main(void)
+{
+	struct mnl_socket *nl;
+	char buf[MNL_SOCKET_BUFFER_SIZE];
+	struct nlmsghdr *nlh;
+#ifdef TID
+	struct fib_rule_hdr *frh;
+#endif
+	struct ifinfomsg *ifi;
+
+	nl = mnl_socket_open(NETLINK_ROUTE);
+	if(nl == NULL)
+		goto err;
+
+	if(mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID) < 0)
+		goto err1;
+
+#ifdef TID
+	/* ip rule del ADDRESS/32 table TID */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_DELRULE;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+	frh = mnl_nlmsg_put_extra_header(nlh, sizeof(*frh));
+	frh->family = AF_INET;
+	frh->dst_len = 32;
+#if TID > 255
+	frh->table = RT_TABLE_UNSPEC;
+	mnl_attr_put_u32(nlh, FRA_TABLE, TID);
+#else
+	frh->table = TID;
+#endif
+	frh->action = FR_ACT_TO_TBL;
+	mnl_attr_put_u32(nlh, RTA_DST, ADDRESS);
+	mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+#endif
+
+#ifdef TID
+	/* ip rule del 192.168.88.0/24 table TID (from VM net) */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_DELRULE;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL;
+	frh = mnl_nlmsg_put_extra_header(nlh, sizeof(*frh));
+	frh->family = AF_INET;
+	frh->dst_len = 24;
+#if TID > 255
+	frh->table = RT_TABLE_UNSPEC;
+	mnl_attr_put_u32(nlh, FRA_TABLE, TID);
+#else
+	frh->table = TID;
+#endif
+	frh->action = FR_ACT_TO_TBL;
+	mnl_attr_put_u32(nlh, RTA_DST, IPv4(192, 168, 88, 0));
+	mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+#endif
+
+	/* bring down and remove interface */
+	nlh = mnl_nlmsg_put_header(buf);
+	nlh->nlmsg_type = RTM_DELLINK;
+	nlh->nlmsg_flags = NLM_F_REQUEST;
+	ifi = mnl_nlmsg_put_extra_header(nlh, sizeof(*ifi));
+	ifi->ifi_family = AF_UNSPEC;
+	ifi->ifi_change = IFF_UP;
+
+	mnl_attr_put(nlh, IFLA_IFNAME, sizeof(wgX), wgX);
+	if(mnl_socket_sendto(nl, nlh, nlh->nlmsg_len) <= 0)
+		goto err1;
+
+	mnl_socket_close(nl);
+	return EXIT_SUCCESS;
+
+err1:	mnl_socket_close(nl);
+err:	return EXIT_FAILURE;
+}
